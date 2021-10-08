@@ -7,7 +7,9 @@ CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
-months = ['january', 'february', 'march', 'april', 'may', 'june','july','august','september','october','november','december']
+# months = ['january', 'february', 'march', 'april', 'may', 'june','july','august','september','october','november','december']
+months = ['all','january', 'february', 'march', 'april', 'may', 'june']
+days=['all', 'sunday', 'monday', 'tuesday', 'wednesday','thursday','friday','saturday' ]
 
 
 def get_filters():
@@ -19,13 +21,19 @@ def get_filters():
         (str) month - name of the month to filter by, or "all" to apply no month filter
         (str) day - name of the day of week to filter by, or "all" to apply no day filter
     """
-    print('Hello! Let\'s explore some US bikeshare data!')
     city = ""
     month=""
     day=""
-    months = ['all','january', 'february', 'march', 'april', 'may', 'june']
-    days=['all', 'sunday', 'monday', 'tuesday', 'wednesday','thursday','friday','saturday' ]
+    i=0
+    cont="yes"
+    cont_flag = False
+    cont_flag2= False
+
+
+    print('Hello! Let\'s explore some US bikeshare data!')
+
     while city not in CITY_DATA:
+        
         city = input('Please choose the city you want to explore! Choose between (Chicago - New York city - Washington)\n').lower()
 
         if city not in CITY_DATA:
@@ -33,26 +41,55 @@ def get_filters():
             print ("Sorry! We don't have this city's data, choose only between (Chicago - New York city - Washington)\nThe program will restart now")
             print('-'*40)
 
-    while month not in months:
 
-        month = input("Please choose the month you want to explore or choose all if you want all months' data\n").lower()
+    vwr_desire=input("Would you like to display raw data? please answer yes or no!\n").lower()
+   
+    filename = CITY_DATA[city]
+    
+    df = pd.read_csv(filename)
 
-        if month not in months:
-            print('Sorry! We only have the data of months from january to june.\nPlease choose an available month')
-            print('-'*40)
+    while vwr_desire== "yes":
+        cont_flag=True
+        i+=1  
+        print(df.iloc[(i-1)*5 : 5*i])
+        print("_"*50)
+        vwr_desire=input("Would you like to display more raw data? please answer yes or no!\n").lower()
+        if vwr_desire== "no" :
+            cont_flag2 == True
+
+    if cont_flag == True :
+
+        cont=input("Would you like to continue the analysis or close? To continue write yes and to close write no!\n").lower()
+    
+
+    if (cont_flag == True) and (cont== "no") :
+    # if (cont== "no") :
+        cont_flag2 = False
+
+    while cont == "yes":
+
+        while (month not in months) :
+
+            month = input("Please choose the month you want to explore or choose all if you want all months' data\n").lower()
+
+            if month not in months:
+                print('Sorry! We only have the data of months from january to june.\nPlease choose an available month')
+                print('-'*40)
 
 
-    # TO DO: get user input for day of week (all, monday, tuesday, ... sunday)
-    while day not in days:
+        while day not in days :
 
-        day = input("Please choose the day of the week you want to explore or choose all if you want all the days data\n").lower()
-        if day not in days:
-            ('You entered an unaccepted input, please choose again!\n')
-            print('-'*40)
+            day = input("Please choose the day of the week you want to explore or choose all if you want all the days data\n").lower()
+            if day not in days:
+                ('You entered an unaccepted input, please choose again!\n')
+                print('-'*40)
 
-    print('-'*40)
-    print("You chose to explore {} city's data on {} days of {} month".format(city, day, month))
-    print('-'*40)
+        cont="no"
+
+        print('-'*40)
+        print("You chose to explore {} city's data on {} days of {} month".format(city, day, month))
+        print('-'*40)
+
 
     return city, month, day
 
@@ -69,54 +106,55 @@ def load_data(city, month, day):
     Returns:
         df - Pandas DataFrame containing city data filtered by month and day
     """
+    while month  != "":
+        # load data file into a dataframe
+        filename = CITY_DATA[city]
+        df = pd.read_csv(filename)
+
+        # convert the Start Time column to datetime
+        df['Start Time'] = pd.to_datetime(df['Start Time'])
+
+        # extract month and day of week from Start Time to create new columns
+        df['month'] = df['Start Time'].dt.month
+        # df['day_of_week'] = df['Start Time'].dt.day_name()
+
+
+        try: df['day_of_week'] = df['Start Time'].dt.weekday_name
+        except: df['day_of_week'] = df['Start Time'].dt.day_name()
+        else: df['day_of_week'] = df['Start Time'].dt.weekday
+        
+        
+        
+        df['hour'] = df['Start Time'].dt.hour
+
+
+        # filter by month if applicable
+        if month != 'all':
+            # use the index of the months list to get the corresponding int
+            # months = ['january', 'february', 'march', 'april', 'may', 'june','july','august','september','october','november','december']
+            month = int(months.index(month)) + 1
+        
+            # filter by month to create the new dataframe
+            df = df.loc[df['month'] == month]
+
+        # filter by day of week if applicable
+        if day != 'all':
+            # filter by day of week to create the new dataframe
+            df = df.loc[df['day_of_week'] == day.title()]
+        
+        return df
     
-    # load data file into a dataframe
-    filename = CITY_DATA[city]
-    df = pd.read_csv(filename)
-
-    # convert the Start Time column to datetime
-    df['Start Time'] = pd.to_datetime(df['Start Time'])
-
-    # extract month and day of week from Start Time to create new columns
-    df['month'] = df['Start Time'].dt.month
-    # df['day_of_week'] = df['Start Time'].dt.day_name()
-
-
-    try: df['day_of_week'] = df['Start Time'].dt.weekday_name
-    except: df['day_of_week'] = df['Start Time'].dt.day_name()
-    else: df['day_of_week'] = df['Start Time'].dt.weekday
-    
-    
-    
-    df['hour'] = df['Start Time'].dt.hour
-
-
-    # filter by month if applicable
-    if month != 'all':
-        # use the index of the months list to get the corresponding int
-        months = ['january', 'february', 'march', 'april', 'may', 'june','july','august','september','october','november','december']
-        month = int(months.index(month)) + 1
-    
-        # filter by month to create the new dataframe
-        df = df.loc[df['month'] == month]
-
-    # filter by day of week if applicable
-    if day != 'all':
-        # filter by day of week to create the new dataframe
-        df = df.loc[df['day_of_week'] == day.title()]
-    
-    return df
 
 #######################################################################################################################################################
 
 def time_stats(df):
     """Displays statistics on the most frequent times of travel."""
-
+    test= months[df['month'].mode()[0]]
     print('\nCalculating The Most Frequent Times of Travel...\n')
     start_time = time.time()
 
     # TO DO: display the most common month
-    print("\nThe most common month of travel is {}".format(months[df['month'].mode()[0]-1]))
+    print("\nThe most common month of travel is {}".format(months[df['month'].mode()[0]]))
 
     # TO DO: display the most common day of week
     print("\nThe most common day of travel is {}".format(df['day_of_week'].mode()[0]))
@@ -207,11 +245,13 @@ def main():
         df = load_data(city, month, day)
 
         # print (df.head())
-
-        time_stats(df)
-        station_stats(df)
-        trip_duration_stats(df)
-        user_stats(df)
+        try:
+            time_stats(df)
+            station_stats(df)
+            trip_duration_stats(df)
+            user_stats(df)
+        except:
+            pass
 
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
