@@ -7,6 +7,9 @@ CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
+months = ['january', 'february', 'march', 'april', 'may', 'june','july','august','september','october','november','december']
+
+
 def get_filters():
     """
     Asks user to specify a city, month, and day to analyze.
@@ -17,7 +20,6 @@ def get_filters():
         (str) day - name of the day of week to filter by, or "all" to apply no day filter
     """
     print('Hello! Let\'s explore some US bikeshare data!')
-    # TO DO: get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
     city = ""
     month=""
     day=""
@@ -31,7 +33,6 @@ def get_filters():
             print ("Sorry! We don't have this city's data, choose only between (Chicago - New York city - Washington)\nThe program will restart now")
             print('-'*40)
 
-    # TO DO: get user input for month (all, january, february, ... , june)
     while month not in months:
 
         month = input("Please choose the month you want to explore or choose all if you want all months' data\n").lower()
@@ -115,7 +116,7 @@ def time_stats(df):
     start_time = time.time()
 
     # TO DO: display the most common month
-    print("\nThe most common month of travel is {}".format(df['month'].mode()[0]))
+    print("\nThe most common month of travel is {}".format(months[df['month'].mode()[0]-1]))
 
     # TO DO: display the most common day of week
     print("\nThe most common day of travel is {}".format(df['day_of_week'].mode()[0]))
@@ -174,24 +175,30 @@ def trip_duration_stats(df):
 def user_stats(df):
     """Displays statistics on bikeshare users."""
 
-    print('\nCalculating User Stats...\n')
-    start_time = time.time()
-
-    # TO DO: Display counts of user types
-    print('\nTypes and counts of available users types:\n',df['User Type'].value_counts())
-
-    # TO DO: Display counts of gender
-    print('\nCount of each gender:\n',df['Gender'].value_counts())
+    try:
 
 
-    # TO DO: Display earliest, most recent, and most common year of birth
-    print('\nThe earliest year of birth: \n',df['Birth Year'].min())
-    print('\nThe most recent year of birth: \n',df['Birth Year'].max())
-    print('\nThe most common year of birth: \n',df['Birth Year'].mode()[0])
+        print('\nCalculating User Stats...\n')
+        start_time = time.time()
+
+        # TO DO: Display counts of user types
+        print('\nTypes and counts of available users types:\n',df['User Type'].value_counts())
+
+        # TO DO: Display counts of gender
+        print('\nCount of each gender:\n',df['Gender'].value_counts())
 
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
-    print('-'*40)
+        # TO DO: Display earliest, most recent, and most common year of birth
+        print('\nThe earliest year of birth: \n',df['Birth Year'].min())
+        print('\nThe most recent year of birth: \n',df['Birth Year'].max())
+        print('\nThe most common year of birth: \n',df['Birth Year'].mode()[0])
+
+
+        print("\nThis took %s seconds." % (time.time() - start_time))
+        print('-'*40)
+
+    except: 
+        print("Sorry, the gender and ages of users aren't available for this city")
 
 
 def main():
